@@ -1,112 +1,206 @@
-# StreamFlow
+# Streamflow
 
-A modern, efficient file upload system with advanced chunking capabilities.
+A powerful, secure, and memory-efficient file upload library for modern web applications.
 
-## Features Implemented
+[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue.svg)](https://www.typescriptlang.org/)
+[![Security](https://img.shields.io/badge/Security-Enhanced-green.svg)]()
+[![Memory Safe](https://img.shields.io/badge/Memory-Optimized-orange.svg)]()
 
-### 1. Core Chunking System
-- ✅ Size-based chunking for binary files
-- ✅ Line-based chunking for text files (CSV, Excel)
-- ✅ Configurable chunk sizes
-- ✅ Support for multiple file types
-- ✅ Progress tracking and reporting
+## Features
 
-### 2. Validation System
-- ✅ Chunk validation based on type (binary/lines)
-- ✅ Size validation
-- ✅ Line count validation
-- ✅ Data structure consistency checks
-- ✅ Warning system for non-critical issues
+### Core Upload Capabilities
+- 🚀 Streaming uploads with chunk-based processing
+- 📊 Real-time progress tracking
+- ⏯️ Pause/Resume functionality
+- 🔄 Concurrent upload support
+- 🔁 Automatic retry mechanism
+- 💾 Memory-efficient operations
 
-### 3. Progress Tracking
-- ✅ Real-time progress updates
-- ✅ Processing speed metrics
-- ✅ Estimated time remaining
-- ✅ Bytes/lines processed tracking
+### Security
+- 🔒 File validation and sanitization
+- 🛡️ Access control with token-based authentication
+- 🚦 Rate limiting and DDoS protection
+- 🔐 AES-GCM encryption
+- 📝 File signature verification
+- 🦠 Basic malware detection
 
-### 4. Compression System
-- ✅ Adaptive compression based on chunk size
-- ✅ Different strategies for binary and text data
-- ✅ Compression statistics (ratio, time, savings)
-- ✅ Transparent compression/decompression
-- ✅ Data integrity verification
+### Performance
+- 🧵 Worker thread support
+- 📦 Automatic compression
+- 🧹 Smart memory management
+- ♻️ Automatic resource cleanup
+- 🎯 Optimized chunking strategies
 
-### 5. Caching System
-- ✅ In-memory LRU cache
-- ✅ Automatic cache cleanup
-- ✅ Cache statistics
-- ✅ Compressed chunk storage
-- ✅ Data integrity checks
+### Memory Management
+- 📊 Memory usage tracking
+- 🔄 Automatic garbage collection
+- ⚡ Resource optimization
+- 🎚️ Configurable thresholds
+- 🏷️ Resource tagging
 
-### 6. File Preview System
-- ✅ Image preview
-- ✅ Video preview
-- ✅ PDF preview
-- ✅ Text preview
-- ✅ Spreadsheet preview
+## Installation
 
-## Roadmap (Features to Implement)
+```bash
+npm install @streamflow/core
+```
 
-### 1. Enhanced Compression
-- 🔲 Multiple compression algorithms
-- 🔲 Compression level options
-- 🔲 Streaming compression
-- 🔲 Compression strategy optimization
-- 🔲 WebAssembly-based compression
-
-### 2. Advanced Caching
-- 🔲 Persistent cache storage
-- 🔲 Cache preloading
-- 🔲 Cache prioritization
-- 🔲 Distributed caching
-- 🔲 Cache eviction policies
-
-### 3. Security Features
-- 🔲 Chunk encryption
-- 🔲 Virus scanning
-- 🔲 Content validation
-- 🔲 Access control
-- 🔲 Audit logging
-
-### 4. Performance Optimizations
-- 🔲 Worker thread processing
-- 🔲 Parallel chunk processing
-- 🔲 Memory usage optimization
-- 🔲 Network retry strategies
-- 🔲 Bandwidth adaptation
-
-### 5. Advanced Features
-- 🔲 Resume interrupted uploads
-- 🔲 Chunk deduplication
-- 🔲 Smart chunk sizing
-- 🔲 Metadata extraction
-- 🔲 File repair system
-
-## Usage
+## Quick Start
 
 ```typescript
-const chunks = await createChunks(file, config, progress => {
-  console.log(`Processing: ${progress.currentChunk}/${progress.totalChunks}`);
+import { StreamUploadManager } from '@streamflow/core';
+
+// Initialize with default configuration
+const manager = new StreamUploadManager();
+
+// Start a basic upload
+try {
+  await manager.startStreaming(file, '/api/upload', {
+    onProgress: (progress) => console.log(`Upload: ${progress.percentage}%`),
+    userId: 'user123',
+    accessToken: 'your-access-token'
+  });
+} catch (error) {
+  console.error('Upload failed:', error.message);
+}
+```
+
+## Advanced Configuration
+
+### Complete Configuration Example
+```typescript
+const manager = new StreamUploadManager({
+  // Upload Configuration
+  chunkSize: 1024 * 1024, // 1MB chunks
+  concurrentStreams: 3,
+  compressionEnabled: true,
+  validateChunks: true,
+  retryAttempts: 3,
+  workerConfig: {
+    maxWorkers: 4,
+    taskTimeout: 30000
+  }
 }, {
-  sanitization: {
-    removeHtml: true,
-    trimWhitespace: true
-  },
-  caching: {
+  // Memory Configuration
+  maxMemoryUsage: 100 * 1024 * 1024, // 100MB
+  cleanupInterval: 30000,
+  enableAutoCleanup: true,
+  thresholds: {
+    warning: 0.7,  // 70% of max memory
+    critical: 0.9  // 90% of max memory
+  }
+}, {
+  // Security Configuration
+  maxFileSize: 50 * 1024 * 1024, // 50MB
+  allowedMimeTypes: ['image/*', 'application/pdf'],
+  allowedExtensions: ['.jpg', '.png', '.pdf'],
+  validateFileSignature: true,
+  enableVirusScan: true,
+  encryption: {
     enabled: true,
-    maxSize: 100,
-    maxAge: 5 * 60 * 1000
+    algorithm: 'AES-GCM',
+    keySize: 256
+  },
+  rateLimit: {
+    enabled: true,
+    maxRequestsPerMinute: 30,
+    maxConcurrentUploads: 3
+  },
+  accessControl: {
+    enabled: true,
+    tokenExpiration: 3600,
+    maxTokensPerUser: 5
   }
 });
 ```
 
-## Dependencies
-- pako: ^2.1.0 (Compression)
-- papaparse: ^5.4.1 (CSV parsing)
-- xlsx: ^0.18.5 (Excel parsing)
+## Security Best Practices
+
+### Access Control
+```typescript
+// Generate a secure access token
+const token = manager.securityManager.generateAccessToken('user123');
+
+// Use the token for uploads
+await manager.startStreaming(file, '/api/upload', {
+  userId: 'user123',
+  accessToken: token
+});
+```
+
+### File Validation
+```typescript
+// Configure allowed file types
+const config = {
+  allowedMimeTypes: ['image/jpeg', 'image/png', 'application/pdf'],
+  allowedExtensions: ['.jpg', '.png', '.pdf'],
+  maxFileSize: 10 * 1024 * 1024, // 10MB
+  validateFileSignature: true
+};
+```
+
+## Memory Management
+
+### Monitoring Memory Usage
+```typescript
+// Get current memory stats
+const stats = manager.getMemoryStats();
+console.log('Memory usage:', stats.totalAllocated / 1024 / 1024, 'MB');
+console.log('Active resources:', stats.activeResources);
+```
+
+### Cleanup
+```typescript
+// Manual cleanup
+manager.dispose();
+```
+
+## Error Handling
+
+```typescript
+try {
+  await manager.startStreaming(file, '/api/upload', options);
+} catch (error) {
+  if (error.code === 'RATE_LIMIT_EXCEEDED') {
+    console.log('Please wait before uploading more files');
+  } else if (error.code === 'INVALID_FILE') {
+    console.log('File validation failed:', error.message);
+  } else if (error.code === 'MEMORY_LIMIT_EXCEEDED') {
+    console.log('System is busy, try again later');
+  }
+}
+```
+
+## Events and Progress Tracking
+
+```typescript
+manager.startStreaming(file, '/api/upload', {
+  onProgress: (progress) => {
+    console.log(`Upload progress: ${progress.percentage}%`);
+    console.log(`Speed: ${progress.speed} MB/s`);
+    console.log(`Remaining time: ${progress.estimatedTimeRemaining}s`);
+    console.log(`Processed: ${progress.bytesUploaded} / ${progress.totalBytes}`);
+  }
+});
+```
+
+## Browser Support
+
+- ✅ Chrome 76+
+- ✅ Firefox 69+
+- ✅ Safari 14.1+
+- ✅ Edge 79+
 
 ## Contributing
-Contributions are welcome! Please read our contributing guidelines for details.
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+
+MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- 📚 [Documentation](docs/README.md)
+- 💬 [Discord Community](https://discord.gg/streamflow)
+- 🐛 [Issue Tracker](https://github.com/streamflow/streamflow/issues)
+- 📧 [Email Support](mailto:support@streamflow.dev)
