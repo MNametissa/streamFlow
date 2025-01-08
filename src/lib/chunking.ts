@@ -160,7 +160,7 @@ async function createLineBasedChunks(
 
     if (file.type === 'text/csv') {
       Papa.parse(file, {
-        step: async (results) => {
+        step: async (results: any) => {
           if (Array.isArray(results.data)) {
             // Sanitize CSV data
             const sanitizedRow = (results.data as string[]).map(cell => 
